@@ -14,8 +14,16 @@ class GameScene: SKScene {
     private var floor: SKSpriteNode!
     private var intro: SKSpriteNode!
     private var player: SKSpriteNode!
+    private var scoreLabel: SKLabelNode!
+    
     private let gameArea: CGFloat = 410.0
     private let velocity: Double = 100.0
+    
+    private var gameStarted = false
+    private var gameFinished = false
+    private var gameRestarted = false
+    private var score: Int = 0
+    private let flyForce: CGFloat = 30.0
     
     override func didMove(to view: SKView) {
         addBackground()
@@ -76,11 +84,42 @@ class GameScene: SKScene {
         addChild(player)
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    private func addScore() {
+        scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+        scoreLabel.fontSize = 94
+        scoreLabel.text = "\(score)"
+        scoreLabel.alpha = 0.8
+        scoreLabel.position = CGPoint(x: size.width/2, y: size.height - 100)
+        scoreLabel.zPosition = 5
+        addChild(scoreLabel)
+    }
+    
+    private func startGame() {
+        player.physicsBody = SKPhysicsBody(circleOfRadius: player.size.width/2 - 10)
+        player.physicsBody?.isDynamic = true
+        player.physicsBody?.allowsRotation = true
+        player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: flyForce))
         
+        gameStarted = true
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if !gameFinished {
+            if !gameStarted {
+                intro.removeFromParent()
+                addScore()
+                startGame()
+            } else {
+                player.physicsBody?.velocity = CGVector.zero
+                player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: flyForce))
+            }
+        }
     }
     
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+        guard let physicsBody = player.physicsBody else { return }
+        
+        let yVelocity = physicsBody.velocity.dy * 0.001 as CGFloat
+        player.zRotation = yVelocity
     }
 }
