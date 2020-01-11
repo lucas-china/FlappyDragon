@@ -14,7 +14,8 @@ class GameScene: SKScene {
     private var floor: SKSpriteNode!
     private var intro: SKSpriteNode!
     private var player: SKSpriteNode!
-    private var gameArea: CGFloat = 410.0
+    private let gameArea: CGFloat = 410.0
+    private let velocity: Double = 100.0
     
     override func didMove(to view: SKView) {
         addBackground()
@@ -37,6 +38,16 @@ class GameScene: SKScene {
         let height = size.height - gameArea - (floor.size.height / 2)
         floor.position = CGPoint(x: floor.size.width/2, y: height)
         addChild(floor)
+        moveFloor()
+    }
+    
+    private func moveFloor() {
+        let duration = Double(floor.size.width/2)/velocity
+        let moveFloorAction = SKAction.moveBy(x: -floor.size.width/2, y: 0, duration: duration)
+        let resetXAction = SKAction.moveBy(x: floor.size.width/2, y: 0, duration: 0)
+        let sequeceAction = SKAction.sequence([moveFloorAction, resetXAction])
+        let repeatAction = SKAction.repeatForever(sequeceAction)
+        floor.run(repeatAction)
     }
     
     private func addIntro() {
@@ -50,6 +61,18 @@ class GameScene: SKScene {
         player = SKSpriteNode(imageNamed: "player1")
         player.position = CGPoint(x: 60, y: size.height - gameArea/2)
         player.zPosition = 4
+        
+        var playerTextures = [SKTexture]()
+        
+        for i in 1...4 {
+            let playerTexture = SKTexture(imageNamed: "player\(i)")
+            playerTextures.append(playerTexture)
+        }
+        
+        let animationAction = SKAction.animate(with: playerTextures, timePerFrame: 0.09)
+        let repeatAction = SKAction.repeatForever(animationAction)
+        player.run(repeatAction)
+        
         addChild(player)
     }
     
